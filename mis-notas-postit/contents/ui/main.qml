@@ -21,16 +21,17 @@ PlasmoidItem {
     property bool enableMarkdown: Plasmoid.configuration.enableMarkdown
 
     property bool initialized: false
+    property bool resizing: false
 
     property var colorPalette: [
-        { name: "Amarillo", hex: "#fff9a6" },
-        { name: "Rosa", hex: "#ffb6c1" },
-        { name: "Verde", hex: "#b5e8b5" },
-        { name: "Azul", hex: "#b5d8e8" },
-        { name: "Naranja", hex: "#ffdab9" },
-        { name: "Morado", hex: "#d8b5e8" },
-        { name: "Cyan", hex: "#b5e8e8" },
-        { name: "Gris", hex: "#d9d9d9" },
+        { name: "Amarillo", hex: "#fff176" },
+        { name: "Rosa", hex: "#f48fb1" },
+        { name: "Verde", hex: "#a5d6a7" },
+        { name: "Azul", hex: "#90caf9" },
+        { name: "Naranja", hex: "#ffcc80" },
+        { name: "Morado", hex: "#ce93d8" },
+        { name: "Cyan", hex: "#80deea" },
+        { name: "Gris", hex: "#bdbdbd" },
         { name: "Blanco", hex: "#ffffff" }
     ]
 
@@ -41,11 +42,8 @@ PlasmoidItem {
 
     Layout.minimumWidth: minimumWidth
     Layout.minimumHeight: minimumHeight
-    Layout.preferredWidth: minimumWidth
-    Layout.preferredHeight: minimumHeight
-
-    width: Plasmoid.configuration.widgetWidth
-    height: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
+    Layout.preferredWidth: resizing ? undefined : Plasmoid.configuration.widgetWidth
+    Layout.preferredHeight: isCollapsed ? 40 : (resizing ? undefined : Plasmoid.configuration.widgetHeight)
 
     Component.onCompleted: {
         initialized = true
@@ -69,7 +67,7 @@ PlasmoidItem {
                 id: titleBar
                 Layout.fillWidth: true
                 Layout.preferredHeight: 32
-                color: Qt.darker(root.noteColor, 1.1)
+                color: Qt.darker(root.noteColor, 1.15)
                 radius: 6
 
                 MouseArea {
@@ -102,7 +100,7 @@ PlasmoidItem {
                         text: "Post-it"
                         font.bold: true
                         font.pixelSize: 12
-                        color: "#444444"
+                        color: "#222222"
                         Layout.fillWidth: true
                     }
 
@@ -142,7 +140,7 @@ PlasmoidItem {
                 id: formatBar
                 Layout.fillWidth: true
                 Layout.preferredHeight: 32
-                color: Qt.darker(root.noteColor, 1.05)
+                color: Qt.darker(root.noteColor, 1.08)
                 radius: 4
                 visible: !root.isCollapsed && textArea.activeFocus
                 opacity: visible ? 1 : 0
@@ -343,7 +341,8 @@ PlasmoidItem {
                     wrapMode: TextEdit.Wrap
                     selectByMouse: true
                     background: null
-                    color: "#333333"
+                    color: "#222222"
+                    placeholderTextColor: "#888888"
                     font.family: root.noteFontFamily
                     font.pixelSize: root.noteFontSize
                     textFormat: root.enableMarkdown ? TextEdit.MarkdownText : TextEdit.RichText
@@ -388,6 +387,7 @@ PlasmoidItem {
             property real startH
 
             onPressed: (mouse) => {
+                root.resizing = true
                 pressX = root.x + root.width
                 pressY = root.y + root.height
                 startW = root.width
@@ -400,18 +400,22 @@ PlasmoidItem {
                     var absY = root.y + mouse.y
                     var newW = Math.max(root.minimumWidth, startW + (absX - pressX))
                     var newH = Math.max(root.minimumHeight, startH + (absY - pressY))
-                    root.width = newW
-                    root.height = newH
-                    Plasmoid.configuration.widgetWidth = newW
-                    Plasmoid.configuration.widgetHeight = newH
+                    root.Layout.preferredWidth = newW
+                    root.Layout.preferredHeight = newH
                 }
+            }
+
+            onReleased: {
+                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
+                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
+                root.resizing = false
             }
 
             Canvas {
                 anchors.fill: parent
                 onPaint: {
                     var ctx = getContext("2d")
-                    ctx.strokeStyle = "#888"
+                    ctx.strokeStyle = "#666"
                     ctx.lineWidth = 1
                     ctx.beginPath()
                     ctx.moveTo(width - 2, 2)
@@ -440,6 +444,7 @@ PlasmoidItem {
             property real startH
 
             onPressed: (mouse) => {
+                root.resizing = true
                 pressY = root.y + root.height
                 startH = root.height
             }
@@ -448,9 +453,13 @@ PlasmoidItem {
                 if (pressed) {
                     var absY = root.y + mouse.y
                     var newH = Math.max(root.minimumHeight, startH + (absY - pressY))
-                    root.height = newH
-                    Plasmoid.configuration.widgetHeight = newH
+                    root.Layout.preferredHeight = newH
                 }
+            }
+
+            onReleased: {
+                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
+                root.resizing = false
             }
         }
 
@@ -469,6 +478,7 @@ PlasmoidItem {
             property real startW
 
             onPressed: (mouse) => {
+                root.resizing = true
                 pressX = root.x + root.width
                 startW = root.width
             }
@@ -477,9 +487,13 @@ PlasmoidItem {
                 if (pressed) {
                     var absX = root.x + mouse.x
                     var newW = Math.max(root.minimumWidth, startW + (absX - pressX))
-                    root.width = newW
-                    Plasmoid.configuration.widgetWidth = newW
+                    root.Layout.preferredWidth = newW
                 }
+            }
+
+            onReleased: {
+                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
+                root.resizing = false
             }
         }
     }
