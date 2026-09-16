@@ -22,11 +22,10 @@ PlasmoidItem {
 
     property bool initialized: false
 
-    width: Plasmoid.configuration.widgetWidth
-    height: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
-
     Layout.minimumWidth: minimumWidth
     Layout.minimumHeight: minimumHeight
+    Layout.preferredWidth: Plasmoid.configuration.widgetWidth
+    Layout.preferredHeight: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
 
     Component.onCompleted: {
         initialized = true
@@ -391,23 +390,23 @@ PlasmoidItem {
                 active = true
                 initMouseX = mouse.x
                 initMouseY = mouse.y
-                startW = root.width
-                startH = root.height
+                startW = root.Layout.preferredWidth
+                startH = root.Layout.preferredHeight
             }
 
             onPositionChanged: (mouse) => {
                 if (active) {
                     var dx = mouse.x - initMouseX
                     var dy = mouse.y - initMouseY
-                    root.width = Math.max(root.minimumWidth, startW + dx)
-                    root.height = Math.max(root.minimumHeight, startH + dy)
+                    root.Layout.preferredWidth = Math.max(root.minimumWidth, startW + dx)
+                    root.Layout.preferredHeight = Math.max(root.minimumHeight, startH + dy)
                 }
             }
 
             onReleased: {
                 active = false
-                Plasmoid.configuration.widgetWidth = root.width
-                Plasmoid.configuration.widgetHeight = root.height
+                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
+                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
             }
 
             Canvas {
@@ -446,19 +445,19 @@ PlasmoidItem {
             onPressed: (mouse) => {
                 active = true
                 initMouseY = mouse.y
-                startH = root.height
+                startH = root.Layout.preferredHeight
             }
 
             onPositionChanged: (mouse) => {
                 if (active) {
                     var dy = mouse.y - initMouseY
-                    root.height = Math.max(root.minimumHeight, startH + dy)
+                    root.Layout.preferredHeight = Math.max(root.minimumHeight, startH + dy)
                 }
             }
 
             onReleased: {
                 active = false
-                Plasmoid.configuration.widgetHeight = root.height
+                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
             }
         }
 
@@ -480,19 +479,19 @@ PlasmoidItem {
             onPressed: (mouse) => {
                 active = true
                 initMouseX = mouse.x
-                startW = root.width
+                startW = root.Layout.preferredWidth
             }
 
             onPositionChanged: (mouse) => {
                 if (active) {
                     var dx = mouse.x - initMouseX
-                    root.width = Math.max(root.minimumWidth, startW + dx)
+                    root.Layout.preferredWidth = Math.max(root.minimumWidth, startW + dx)
                 }
             }
 
             onReleased: {
                 active = false
-                Plasmoid.configuration.widgetWidth = root.width
+                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
             }
         }
     }

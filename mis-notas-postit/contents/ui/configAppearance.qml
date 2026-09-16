@@ -8,11 +8,12 @@ import org.kde.kcmutils as KCM
 KCM.SimpleKCM {
     id: root
 
+    property alias cfg_noteTransparency: transparencySlider.value
+    property alias cfg_noteFontSize: fontSizeSpinBox.value
+    property alias cfg_enableMarkdown: markdownCheck.checked
+
     property string cfg_noteColor: "#fff176"
-    property double cfg_noteTransparency: 1.0
     property string cfg_noteFontFamily: "Sans Serif"
-    property int cfg_noteFontSize: 14
-    property bool cfg_enableMarkdown: false
 
     property var colorPalette: [
         { name: "Amarillo", hex: "#fff176" },
@@ -27,8 +28,6 @@ KCM.SimpleKCM {
     ]
 
     Kirigami.FormLayout {
-        anchors.fill: parent
-
         RowLayout {
             Kirigami.FormData.label: i18nc("@label", "Color de fondo:")
 
@@ -59,8 +58,6 @@ KCM.SimpleKCM {
                 from: 0.2
                 to: 1.0
                 stepSize: 0.05
-                value: root.cfg_noteTransparency
-                onMoved: root.cfg_noteTransparency = value
                 Layout.fillWidth: true
             }
 
@@ -91,8 +88,6 @@ KCM.SimpleKCM {
                 id: fontSizeSpinBox
                 from: 8
                 to: 72
-                value: root.cfg_noteFontSize
-                onValueModified: root.cfg_noteFontSize = value
             }
 
             QQC2.Label {
@@ -102,11 +97,9 @@ KCM.SimpleKCM {
         }
 
         QQC2.CheckBox {
-            id: markdownCheckBox
+            id: markdownCheck
             Kirigami.FormData.label: i18nc("@label", "Markdown:")
             text: i18nc("@option", "Habilitar soporte Markdown")
-            checked: root.cfg_enableMarkdown
-            onToggled: root.cfg_enableMarkdown = checked
         }
     }
 }
