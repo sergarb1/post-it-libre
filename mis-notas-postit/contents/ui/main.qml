@@ -22,6 +22,8 @@ PlasmoidItem {
     property int noteFontSize: Plasmoid.configuration.noteFontSize
     property bool enableMarkdown: Plasmoid.configuration.enableMarkdown
 
+    property bool initialized: false
+
     property var colorPalette: [
         { name: "Amarillo", hex: "#fff9a6" },
         { name: "Rosa", hex: "#ffb6c1" },
@@ -44,6 +46,10 @@ PlasmoidItem {
     Layout.preferredWidth: savedWidth
     Layout.preferredHeight: isCollapsed ? 40 : savedHeight
 
+    Component.onCompleted: {
+        initialized = true
+    }
+
     Rectangle {
         id: postItBg
         anchors.fill: parent
@@ -65,11 +71,33 @@ PlasmoidItem {
                 color: Qt.darker(root.noteColor, 1.1)
                 radius: 6
 
+                // MouseArea de arrastre - DEBE ir ANTES del RowLayout
+                MouseArea {
+                    id: dragArea
+                    anchors.fill: parent
+                    property real lastX
+                    property real lastY
+
+                    onPressed: (mouse) => {
+                        lastX = mouse.x
+                        lastY = mouse.y
+                    }
+
+                    onPositionChanged: (mouse) => {
+                        if (pressed) {
+                            root.x += mouse.x - lastX
+                            root.y += mouse.y - lastY
+                        }
+                    }
+                }
+
+                // Botones encima del MouseArea
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
                     anchors.rightMargin: 4
                     spacing: 2
+                    z: 1
 
                     Text {
                         text: "Post-it"
@@ -86,7 +114,10 @@ PlasmoidItem {
                         implicitWidth: 26
                         implicitHeight: 26
                         font.pixelSize: 14
-                        onClicked: Plasmoid.internalAction("configure").trigger()
+                        z: 2
+                        onClicked: {
+                            Plasmoid.internalAction("configure").trigger()
+                        }
                         ToolTip.text: "Configuracion"
                         ToolTip.visible: hovered
                     }
@@ -98,43 +129,13 @@ PlasmoidItem {
                         implicitHeight: 26
                         font.pixelSize: 16
                         font.bold: true
+                        z: 2
                         onClicked: {
                             root.isCollapsed = !root.isCollapsed
                             Plasmoid.configuration.isCollapsed = root.isCollapsed
                         }
                         ToolTip.text: root.isCollapsed ? "Expandir" : "Colapsar"
                         ToolTip.visible: hovered
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    property real lastX
-                    property real lastY
-                    property bool dragging: false
-
-                    onPressed: (mouse) => {
-                        lastX = mouse.x
-                        lastY = mouse.y
-                        dragging = false
-                    }
-
-                    onPositionChanged: (mouse) => {
-                        if (pressed) {
-                            var dx = mouse.x - lastX
-                            var dy = mouse.y - lastY
-                            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-                                dragging = true
-                            }
-                            if (dragging) {
-                                root.x += dx
-                                root.y += dy
-                            }
-                        }
-                    }
-
-                    onReleased: {
-                        dragging = false
                     }
                 }
             }
@@ -200,14 +201,19 @@ PlasmoidItem {
                     ComboBox {
                         id: fontCombo
                         model: root.systemFonts
-                        currentIndex: root.systemFonts.indexOf(root.noteFontFamily) >= 0
-                            ? root.systemFonts.indexOf(root.noteFontFamily) : 0
-                        implicitWidth: 110
+                        currentIndex: {
+                            var idx = root.systemFonts.indexOf(root.noteFontFamily)
+                            return idx >= 0 ? idx : 0
+                        }
+                        implicitWidth: 120
                         implicitHeight: 26
                         font.pixelSize: 11
-                        onCurrentTextChanged: {
-                            root.noteFontFamily = currentText
-                            Plasmoid.configuration.noteFontFamily = currentText
+                        onActivated: (index) => {
+                            if (root.initialized) {
+                                var selectedFont = root.systemFonts[index]
+                                root.noteFontFamily = selectedFont
+                                Plasmoid.configuration.noteFontFamily = selectedFont
+                            }
                         }
                     }
 
@@ -220,8 +226,10 @@ PlasmoidItem {
                         implicitHeight: 26
                         font.pixelSize: 11
                         onValueModified: {
-                            root.noteFontSize = value
-                            Plasmoid.configuration.noteFontSize = value
+                            if (root.initialized) {
+                                root.noteFontSize = value
+                                Plasmoid.configuration.noteFontSize = value
+                            }
                         }
                     }
 
@@ -344,7 +352,9 @@ PlasmoidItem {
                     textFormat: root.enableMarkdown ? TextEdit.MarkdownText : TextEdit.RichText
 
                     onTextChanged: {
-                        Plasmoid.configuration.noteText = text
+                        if (root.initialized) {
+                            Plasmoid.configuration.noteText = text
+                        }
                     }
 
                     Keys.onPressed: (event) => {
