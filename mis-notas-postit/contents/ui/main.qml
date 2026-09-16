@@ -41,8 +41,11 @@ PlasmoidItem {
 
     Layout.minimumWidth: minimumWidth
     Layout.minimumHeight: minimumHeight
-    Layout.preferredWidth: Plasmoid.configuration.widgetWidth
-    Layout.preferredHeight: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
+    Layout.preferredWidth: minimumWidth
+    Layout.preferredHeight: minimumHeight
+
+    width: Plasmoid.configuration.widgetWidth
+    height: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
 
     Component.onCompleted: {
         initialized = true
@@ -371,33 +374,34 @@ PlasmoidItem {
 
         // --- RESIZE: ESQUINA INFERIOR DERECHA ---
         MouseArea {
-            width: 22
-            height: 22
+            id: resizeCorner
+            width: 24
+            height: 24
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             cursorShape: Qt.SizeFDiagCursor
             z: 10
-            preventStealing: true
 
-            property real startX
-            property real startY
+            property real pressX
+            property real pressY
             property real startW
             property real startH
 
             onPressed: (mouse) => {
-                startX = mouse.x
-                startY = mouse.y
+                pressX = root.x + root.width
+                pressY = root.y + root.height
                 startW = root.width
                 startH = root.height
-                mouse.accepted = true
             }
 
             onPositionChanged: (mouse) => {
                 if (pressed) {
-                    var dw = mouse.x - startX
-                    var dh = mouse.y - startY
-                    var newW = Math.max(root.minimumWidth, startW + dw)
-                    var newH = Math.max(root.minimumHeight, startH + dh)
+                    var absX = root.x + mouse.x
+                    var absY = root.y + mouse.y
+                    var newW = Math.max(root.minimumWidth, startW + (absX - pressX))
+                    var newH = Math.max(root.minimumHeight, startH + (absY - pressY))
+                    root.width = newW
+                    root.height = newH
                     Plasmoid.configuration.widgetWidth = newW
                     Plasmoid.configuration.widgetHeight = newH
                 }
@@ -423,56 +427,58 @@ PlasmoidItem {
 
         // --- RESIZE: BORDE INFERIOR ---
         MouseArea {
-            width: parent.width - 22
-            height: 8
+            id: resizeBottom
+            width: parent.width - 24
+            height: 10
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.leftMargin: 22
+            anchors.leftMargin: 24
             cursorShape: Qt.SizeVerCursor
             z: 10
-            preventStealing: true
 
-            property real startY
+            property real pressY
             property real startH
 
             onPressed: (mouse) => {
-                startY = mouse.y
+                pressY = root.y + root.height
                 startH = root.height
-                mouse.accepted = true
             }
 
             onPositionChanged: (mouse) => {
                 if (pressed) {
-                    var dh = mouse.y - startY
-                    Plasmoid.configuration.widgetHeight = Math.max(root.minimumHeight, startH + dh)
+                    var absY = root.y + mouse.y
+                    var newH = Math.max(root.minimumHeight, startH + (absY - pressY))
+                    root.height = newH
+                    Plasmoid.configuration.widgetHeight = newH
                 }
             }
         }
 
         // --- RESIZE: BORDE DERECHO ---
         MouseArea {
-            width: 8
-            height: parent.height - 22
+            id: resizeRight
+            width: 10
+            height: parent.height - 24
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.topMargin: 32
             cursorShape: Qt.SizeHorCursor
             z: 10
-            preventStealing: true
 
-            property real startX
+            property real pressX
             property real startW
 
             onPressed: (mouse) => {
-                startX = mouse.x
+                pressX = root.x + root.width
                 startW = root.width
-                mouse.accepted = true
             }
 
             onPositionChanged: (mouse) => {
                 if (pressed) {
-                    var dw = mouse.x - startX
-                    Plasmoid.configuration.widgetWidth = Math.max(root.minimumWidth, startW + dw)
+                    var absX = root.x + mouse.x
+                    var newW = Math.max(root.minimumWidth, startW + (absX - pressX))
+                    root.width = newW
+                    Plasmoid.configuration.widgetWidth = newW
                 }
             }
         }
