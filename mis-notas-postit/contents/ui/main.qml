@@ -21,7 +21,16 @@ PlasmoidItem {
     property bool enableMarkdown: Plasmoid.configuration.enableMarkdown
 
     property bool initialized: false
-    property bool resizing: false
+
+    width: Plasmoid.configuration.widgetWidth
+    height: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
+
+    Layout.minimumWidth: minimumWidth
+    Layout.minimumHeight: minimumHeight
+
+    Component.onCompleted: {
+        initialized = true
+    }
 
     property var colorPalette: [
         { name: "Amarillo", hex: "#fff176" },
@@ -39,15 +48,6 @@ PlasmoidItem {
         "DejaVu Sans", "DejaVu Serif", "DejaVu Sans Mono", "Liberation Sans",
         "Liberation Serif", "Liberation Mono", "Noto Sans", "Noto Serif",
         "Ubuntu", "Cantarell", "Droid Sans"]
-
-    Layout.minimumWidth: minimumWidth
-    Layout.minimumHeight: minimumHeight
-    Layout.preferredWidth: resizing ? undefined : Plasmoid.configuration.widgetWidth
-    Layout.preferredHeight: isCollapsed ? 40 : (resizing ? undefined : Plasmoid.configuration.widgetHeight)
-
-    Component.onCompleted: {
-        initialized = true
-    }
 
     Rectangle {
         id: postItBg
@@ -387,7 +387,6 @@ PlasmoidItem {
             property real startH
 
             onPressed: (mouse) => {
-                root.resizing = true
                 pressX = root.x + root.width
                 pressY = root.y + root.height
                 startW = root.width
@@ -398,17 +397,14 @@ PlasmoidItem {
                 if (pressed) {
                     var absX = root.x + mouse.x
                     var absY = root.y + mouse.y
-                    var newW = Math.max(root.minimumWidth, startW + (absX - pressX))
-                    var newH = Math.max(root.minimumHeight, startH + (absY - pressY))
-                    root.Layout.preferredWidth = newW
-                    root.Layout.preferredHeight = newH
+                    root.width = Math.max(root.minimumWidth, startW + (absX - pressX))
+                    root.height = Math.max(root.minimumHeight, startH + (absY - pressY))
                 }
             }
 
             onReleased: {
-                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
-                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
-                root.resizing = false
+                Plasmoid.configuration.widgetWidth = root.width
+                Plasmoid.configuration.widgetHeight = root.height
             }
 
             Canvas {
@@ -444,7 +440,6 @@ PlasmoidItem {
             property real startH
 
             onPressed: (mouse) => {
-                root.resizing = true
                 pressY = root.y + root.height
                 startH = root.height
             }
@@ -452,14 +447,12 @@ PlasmoidItem {
             onPositionChanged: (mouse) => {
                 if (pressed) {
                     var absY = root.y + mouse.y
-                    var newH = Math.max(root.minimumHeight, startH + (absY - pressY))
-                    root.Layout.preferredHeight = newH
+                    root.height = Math.max(root.minimumHeight, startH + (absY - pressY))
                 }
             }
 
             onReleased: {
-                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
-                root.resizing = false
+                Plasmoid.configuration.widgetHeight = root.height
             }
         }
 
@@ -478,7 +471,6 @@ PlasmoidItem {
             property real startW
 
             onPressed: (mouse) => {
-                root.resizing = true
                 pressX = root.x + root.width
                 startW = root.width
             }
@@ -486,14 +478,12 @@ PlasmoidItem {
             onPositionChanged: (mouse) => {
                 if (pressed) {
                     var absX = root.x + mouse.x
-                    var newW = Math.max(root.minimumWidth, startW + (absX - pressX))
-                    root.Layout.preferredWidth = newW
+                    root.width = Math.max(root.minimumWidth, startW + (absX - pressX))
                 }
             }
 
             onReleased: {
-                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
-                root.resizing = false
+                Plasmoid.configuration.widgetWidth = root.width
             }
         }
     }
