@@ -2,17 +2,17 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 
-import org.kde.kirigami 2.20 as Kirigami
+import org.kde.kirigami as Kirigami
 import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
-    id: page
+    id: root
 
-    property alias cfg_noteColor: colorCombo.currentIndex
-    property alias cfg_noteTransparency: transparencySlider.value
-    property alias cfg_noteFontFamily: fontCombo.currentText
-    property alias cfg_noteFontSize: fontSizeSpinBox.value
-    property alias cfg_enableMarkdown: markdownCheckBox.checked
+    property string cfg_noteColor: "#fff176"
+    property double cfg_noteTransparency: 1.0
+    property string cfg_noteFontFamily: "Sans Serif"
+    property int cfg_noteFontSize: 14
+    property bool cfg_enableMarkdown: false
 
     property var colorPalette: [
         { name: "Amarillo", hex: "#fff176" },
@@ -29,10 +29,26 @@ KCM.SimpleKCM {
     Kirigami.FormLayout {
         anchors.fill: parent
 
-        ComboBox {
-            id: colorCombo
+        RowLayout {
             Kirigami.FormData.label: i18nc("@label", "Color de fondo:")
-            model: page.colorPalette.map(function(c) { return c.name })
+
+            Repeater {
+                model: root.colorPalette
+                Rectangle {
+                    width: 32
+                    height: 32
+                    radius: 4
+                    color: modelData.hex
+                    border.color: root.cfg_noteColor === modelData.hex ? "#333" : "#ccc"
+                    border.width: root.cfg_noteColor === modelData.hex ? 3 : 1
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.cfg_noteColor = modelData.hex
+                    }
+                }
+            }
         }
 
         RowLayout {
@@ -43,6 +59,8 @@ KCM.SimpleKCM {
                 from: 0.2
                 to: 1.0
                 stepSize: 0.05
+                value: root.cfg_noteTransparency
+                onMoved: root.cfg_noteTransparency = value
                 Layout.fillWidth: true
             }
 
@@ -59,6 +77,11 @@ KCM.SimpleKCM {
                 "DejaVu Sans", "DejaVu Serif", "DejaVu Sans Mono", "Liberation Sans",
                 "Liberation Serif", "Liberation Mono", "Noto Sans", "Noto Serif",
                 "Ubuntu", "Cantarell", "Droid Sans"]
+            currentIndex: {
+                var idx = fontCombo.model.indexOf(root.cfg_noteFontFamily)
+                return idx >= 0 ? idx : 0
+            }
+            onActivated: (index) => root.cfg_noteFontFamily = fontCombo.model[index]
         }
 
         RowLayout {
@@ -68,7 +91,8 @@ KCM.SimpleKCM {
                 id: fontSizeSpinBox
                 from: 8
                 to: 72
-                value: 14
+                value: root.cfg_noteFontSize
+                onValueModified: root.cfg_noteFontSize = value
             }
 
             QQC2.Label {
@@ -81,6 +105,8 @@ KCM.SimpleKCM {
             id: markdownCheckBox
             Kirigami.FormData.label: i18nc("@label", "Markdown:")
             text: i18nc("@option", "Habilitar soporte Markdown")
+            checked: root.cfg_enableMarkdown
+            onToggled: root.cfg_enableMarkdown = checked
         }
     }
 }
