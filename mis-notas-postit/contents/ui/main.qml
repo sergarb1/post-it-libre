@@ -24,8 +24,9 @@ PlasmoidItem {
 
     Layout.minimumWidth: minimumWidth
     Layout.minimumHeight: minimumHeight
-    Layout.preferredWidth: Plasmoid.configuration.widgetWidth
-    Layout.preferredHeight: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
+
+    width: Plasmoid.configuration.widgetWidth
+    height: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
 
     Component.onCompleted: {
         initialized = true

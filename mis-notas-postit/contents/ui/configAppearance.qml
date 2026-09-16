@@ -1,8 +1,7 @@
-import QtQuick
-import QtQuick.Controls as QQC2
-import QtQuick.Layouts
-
-import org.kde.kirigami as Kirigami
+import QtQuick 2.0
+import QtQuick.Controls 2.5 as QQC2
+import QtQuick.Layouts 1.0
+import org.kde.kirigami 2.5 as Kirigami
 import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
@@ -15,24 +14,22 @@ KCM.SimpleKCM {
     property string cfg_noteColor: "#fff176"
     property string cfg_noteFontFamily: "Sans Serif"
 
-    property var colorPalette: [
-        { name: "Amarillo", hex: "#fff176" },
-        { name: "Rosa", hex: "#f48fb1" },
-        { name: "Verde", hex: "#a5d6a7" },
-        { name: "Azul", hex: "#90caf9" },
-        { name: "Naranja", hex: "#ffcc80" },
-        { name: "Morado", hex: "#ce93d8" },
-        { name: "Cyan", hex: "#80deea" },
-        { name: "Gris", hex: "#bdbdbd" },
-        { name: "Blanco", hex: "#ffffff" }
-    ]
-
     Kirigami.FormLayout {
         RowLayout {
             Kirigami.FormData.label: i18nc("@label", "Color de fondo:")
 
             Repeater {
-                model: root.colorPalette
+                model: [
+                    { name: "Amarillo", hex: "#fff176" },
+                    { name: "Rosa", hex: "#f48fb1" },
+                    { name: "Verde", hex: "#a5d6a7" },
+                    { name: "Azul", hex: "#90caf9" },
+                    { name: "Naranja", hex: "#ffcc80" },
+                    { name: "Morado", hex: "#ce93d8" },
+                    { name: "Cyan", hex: "#80deea" },
+                    { name: "Gris", hex: "#bdbdbd" },
+                    { name: "Blanco", hex: "#ffffff" }
+                ]
                 Rectangle {
                     width: 32
                     height: 32
@@ -67,7 +64,7 @@ KCM.SimpleKCM {
             }
         }
 
-        ComboBox {
+        QQC2.ComboBox {
             id: fontCombo
             Kirigami.FormData.label: i18nc("@label", "Fuente:")
             model: ["Sans Serif", "Serif", "Monospace", "Arial", "Courier New",
@@ -92,7 +89,7 @@ KCM.SimpleKCM {
 
             QQC2.Label {
                 text: "px"
-                font.pointSize: Kirigami.Theme.smallFont.pointSize
+                textFormat: Text.PlainText
             }
         }
 
