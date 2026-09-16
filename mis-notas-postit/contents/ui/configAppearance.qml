@@ -3,16 +3,16 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 
 import org.kde.kirigami 2.20 as Kirigami
-import org.kde.kcmutils as KCM
+import org.kde.plasma.core as PlasmaCore
 
-KCM.SimpleKCM {
+Item {
     id: page
 
-    property alias cfg_noteColor: colorCombo.currentIndex
-    property alias cfg_noteTransparency: transparencySlider.value
-    property alias cfg_noteFontFamily: fontCombo.currentText
-    property alias cfg_noteFontSize: fontSizeSpinBox.value
-    property alias cfg_enableMarkdown: markdownCheckBox.checked
+    property string cfg_noteColor: "#fff176"
+    property double cfg_noteTransparency: 1.0
+    property string cfg_noteFontFamily: "Sans Serif"
+    property int cfg_noteFontSize: 14
+    property bool cfg_enableMarkdown: false
 
     property var colorPalette: [
         { name: "Amarillo", hex: "#fff176" },
@@ -28,11 +28,21 @@ KCM.SimpleKCM {
 
     Kirigami.FormLayout {
         anchors.fill: parent
+        anchors.margins: Kirigami.Units.largeSpacing
 
         ComboBox {
             id: colorCombo
             Kirigami.FormData.label: i18nc("@label", "Color de fondo:")
             model: page.colorPalette.map(function(c) { return c.name })
+            currentIndex: {
+                for (var i = 0; i < page.colorPalette.length; i++) {
+                    if (page.colorPalette[i].hex === page.cfg_noteColor) return i;
+                }
+                return 0;
+            }
+            onActivated: (index) => {
+                page.cfg_noteColor = page.colorPalette[index].hex
+            }
         }
 
         RowLayout {
@@ -43,6 +53,8 @@ KCM.SimpleKCM {
                 from: 0.2
                 to: 1.0
                 stepSize: 0.05
+                value: page.cfg_noteTransparency
+                onMoved: page.cfg_noteTransparency = value
                 Layout.fillWidth: true
             }
 
@@ -59,6 +71,13 @@ KCM.SimpleKCM {
                 "DejaVu Sans", "DejaVu Serif", "DejaVu Sans Mono", "Liberation Sans",
                 "Liberation Serif", "Liberation Mono", "Noto Sans", "Noto Serif",
                 "Ubuntu", "Cantarell", "Droid Sans"]
+            currentIndex: {
+                var idx = fontCombo.model.indexOf(page.cfg_noteFontFamily)
+                return idx >= 0 ? idx : 0
+            }
+            onActivated: (index) => {
+                page.cfg_noteFontFamily = fontCombo.model[index]
+            }
         }
 
         RowLayout {
@@ -68,12 +87,12 @@ KCM.SimpleKCM {
                 id: fontSizeSpinBox
                 from: 8
                 to: 72
-                value: 14
+                value: page.cfg_noteFontSize
+                onValueModified: page.cfg_noteFontSize = value
             }
 
             QQC2.Label {
                 text: "px"
-                font.pointSize: Kirigami.Theme.smallFont.pointSize
             }
         }
 
@@ -81,6 +100,8 @@ KCM.SimpleKCM {
             id: markdownCheckBox
             Kirigami.FormData.label: i18nc("@label", "Markdown:")
             text: i18nc("@option", "Habilitar soporte Markdown")
+            checked: page.cfg_enableMarkdown
+            onToggled: page.cfg_enableMarkdown = checked
         }
     }
 }
