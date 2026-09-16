@@ -11,8 +11,6 @@ PlasmoidItem {
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
     property bool isCollapsed: Plasmoid.configuration.isCollapsed
-    property int savedWidth: Plasmoid.configuration.widgetWidth
-    property int savedHeight: Plasmoid.configuration.widgetHeight
     property int minimumWidth: 180
     property int minimumHeight: 60
 
@@ -43,8 +41,8 @@ PlasmoidItem {
 
     Layout.minimumWidth: minimumWidth
     Layout.minimumHeight: minimumHeight
-    Layout.preferredWidth: savedWidth
-    Layout.preferredHeight: isCollapsed ? 40 : savedHeight
+    Layout.preferredWidth: Plasmoid.configuration.widgetWidth
+    Layout.preferredHeight: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
 
     Component.onCompleted: {
         initialized = true
@@ -71,7 +69,6 @@ PlasmoidItem {
                 color: Qt.darker(root.noteColor, 1.1)
                 radius: 6
 
-                // MouseArea de arrastre - DEBE ir ANTES del RowLayout
                 MouseArea {
                     id: dragArea
                     anchors.fill: parent
@@ -91,7 +88,6 @@ PlasmoidItem {
                     }
                 }
 
-                // Botones encima del MouseArea
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
@@ -115,9 +111,7 @@ PlasmoidItem {
                         implicitHeight: 26
                         font.pixelSize: 14
                         z: 2
-                        onClicked: {
-                            Plasmoid.internalAction("configure").trigger()
-                        }
+                        onClicked: Plasmoid.internalAction("configure").trigger()
                         ToolTip.text: "Configuracion"
                         ToolTip.visible: hovered
                     }
@@ -140,7 +134,7 @@ PlasmoidItem {
                 }
             }
 
-            // --- BARRA DE FORMATO (visible con foco) ---
+            // --- BARRA DE FORMATO ---
             Rectangle {
                 id: formatBar
                 Layout.fillWidth: true
@@ -375,29 +369,37 @@ PlasmoidItem {
             }
         }
 
-        // --- MANEJADOR ESQUINA INFERIOR DERECHA ---
+        // --- RESIZE: ESQUINA INFERIOR DERECHA ---
         MouseArea {
-            width: 18
-            height: 18
+            width: 22
+            height: 22
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             cursorShape: Qt.SizeFDiagCursor
             z: 10
+            preventStealing: true
 
-            property real lastX
-            property real lastY
+            property real startX
+            property real startY
+            property real startW
+            property real startH
 
             onPressed: (mouse) => {
-                lastX = mouse.x
-                lastY = mouse.y
+                startX = mouse.x
+                startY = mouse.y
+                startW = root.width
+                startH = root.height
+                mouse.accepted = true
             }
 
             onPositionChanged: (mouse) => {
                 if (pressed) {
-                    var newWidth = root.width + (mouse.x - lastX)
-                    var newHeight = root.height + (mouse.y - lastY)
-                    Plasmoid.configuration.widgetWidth = Math.max(root.minimumWidth, newWidth)
-                    Plasmoid.configuration.widgetHeight = Math.max(root.minimumHeight, newHeight)
+                    var dw = mouse.x - startX
+                    var dh = mouse.y - startY
+                    var newW = Math.max(root.minimumWidth, startW + dw)
+                    var newH = Math.max(root.minimumHeight, startH + dh)
+                    Plasmoid.configuration.widgetWidth = newW
+                    Plasmoid.configuration.widgetHeight = newH
                 }
             }
 
@@ -419,46 +421,63 @@ PlasmoidItem {
             }
         }
 
-        // --- MANEJADOR BORDE INFERIOR ---
+        // --- RESIZE: BORDE INFERIOR ---
         MouseArea {
-            width: parent.width - 18
-            height: 6
+            width: parent.width - 22
+            height: 8
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.leftMargin: 18
+            anchors.leftMargin: 22
             cursorShape: Qt.SizeVerCursor
             z: 10
+            preventStealing: true
 
-            property real lastY
-            onPressed: (mouse) => { lastY = mouse.y }
+            property real startY
+            property real startH
+
+            onPressed: (mouse) => {
+                startY = mouse.y
+                startH = root.height
+                mouse.accepted = true
+            }
+
             onPositionChanged: (mouse) => {
                 if (pressed) {
-                    Plasmoid.configuration.widgetHeight = Math.max(root.minimumHeight, root.height + (mouse.y - lastY))
+                    var dh = mouse.y - startY
+                    Plasmoid.configuration.widgetHeight = Math.max(root.minimumHeight, startH + dh)
                 }
             }
         }
 
-        // --- MANEJADOR BORDE DERECHO ---
+        // --- RESIZE: BORDE DERECHO ---
         MouseArea {
-            width: 6
-            height: parent.height - 18
+            width: 8
+            height: parent.height - 22
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.topMargin: 32
             cursorShape: Qt.SizeHorCursor
             z: 10
+            preventStealing: true
 
-            property real lastX
-            onPressed: (mouse) => { lastX = mouse.x }
+            property real startX
+            property real startW
+
+            onPressed: (mouse) => {
+                startX = mouse.x
+                startW = root.width
+                mouse.accepted = true
+            }
+
             onPositionChanged: (mouse) => {
                 if (pressed) {
-                    Plasmoid.configuration.widgetWidth = Math.max(root.minimumWidth, root.width + (mouse.x - lastX))
+                    var dw = mouse.x - startX
+                    Plasmoid.configuration.widgetWidth = Math.max(root.minimumWidth, startW + dw)
                 }
             }
         }
     }
 
-    // --- FUNCIONES ---
     function insertFormat(prefix, suffix) {
         var start = textArea.selectionStart
         var end = textArea.selectionEnd
