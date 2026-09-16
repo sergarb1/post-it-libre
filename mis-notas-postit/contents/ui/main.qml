@@ -381,28 +381,31 @@ PlasmoidItem {
             cursorShape: Qt.SizeFDiagCursor
             z: 10
 
-            property real pressX
-            property real pressY
+            property real initMouseX
+            property real initMouseY
             property real startW
             property real startH
+            property bool active: false
 
             onPressed: (mouse) => {
-                pressX = root.x + root.width
-                pressY = root.y + root.height
+                active = true
+                initMouseX = mouse.x
+                initMouseY = mouse.y
                 startW = root.width
                 startH = root.height
             }
 
             onPositionChanged: (mouse) => {
-                if (pressed) {
-                    var absX = root.x + mouse.x
-                    var absY = root.y + mouse.y
-                    root.width = Math.max(root.minimumWidth, startW + (absX - pressX))
-                    root.height = Math.max(root.minimumHeight, startH + (absY - pressY))
+                if (active) {
+                    var dx = mouse.x - initMouseX
+                    var dy = mouse.y - initMouseY
+                    root.width = Math.max(root.minimumWidth, startW + dx)
+                    root.height = Math.max(root.minimumHeight, startH + dy)
                 }
             }
 
             onReleased: {
+                active = false
                 Plasmoid.configuration.widgetWidth = root.width
                 Plasmoid.configuration.widgetHeight = root.height
             }
@@ -436,22 +439,25 @@ PlasmoidItem {
             cursorShape: Qt.SizeVerCursor
             z: 10
 
-            property real pressY
+            property real initMouseY
             property real startH
+            property bool active: false
 
             onPressed: (mouse) => {
-                pressY = root.y + root.height
+                active = true
+                initMouseY = mouse.y
                 startH = root.height
             }
 
             onPositionChanged: (mouse) => {
-                if (pressed) {
-                    var absY = root.y + mouse.y
-                    root.height = Math.max(root.minimumHeight, startH + (absY - pressY))
+                if (active) {
+                    var dy = mouse.y - initMouseY
+                    root.height = Math.max(root.minimumHeight, startH + dy)
                 }
             }
 
             onReleased: {
+                active = false
                 Plasmoid.configuration.widgetHeight = root.height
             }
         }
@@ -467,22 +473,25 @@ PlasmoidItem {
             cursorShape: Qt.SizeHorCursor
             z: 10
 
-            property real pressX
+            property real initMouseX
             property real startW
+            property bool active: false
 
             onPressed: (mouse) => {
-                pressX = root.x + root.width
+                active = true
+                initMouseX = mouse.x
                 startW = root.width
             }
 
             onPositionChanged: (mouse) => {
-                if (pressed) {
-                    var absX = root.x + mouse.x
-                    root.width = Math.max(root.minimumWidth, startW + (absX - pressX))
+                if (active) {
+                    var dx = mouse.x - initMouseX
+                    root.width = Math.max(root.minimumWidth, startW + dx)
                 }
             }
 
             onReleased: {
+                active = false
                 Plasmoid.configuration.widgetWidth = root.width
             }
         }
