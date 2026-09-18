@@ -23,12 +23,21 @@ PlasmoidItem {
     property bool initialized: false
 
     Layout.minimumWidth: minimumWidth
-    Layout.minimumHeight: minimumHeight
-
-    width: Plasmoid.configuration.widgetWidth
-    height: isCollapsed ? 40 : Plasmoid.configuration.widgetHeight
+    Layout.minimumHeight: isCollapsed ? 40 : minimumHeight
 
     Component.onCompleted: {
+        var w = Plasmoid.configuration.widgetWidth
+        var h = Plasmoid.configuration.widgetHeight
+        if (w > 0) root.width = w
+        if (h > 0) root.height = h
+
+        var px = Plasmoid.configuration.xPosition
+        var py = Plasmoid.configuration.yPosition
+        if (px >= 0 && py >= 0) {
+            root.x = px
+            root.y = py
+        }
+
         initialized = true
     }
 
@@ -86,6 +95,11 @@ PlasmoidItem {
                             root.x += mouse.x - lastX
                             root.y += mouse.y - lastY
                         }
+                    }
+
+                    onReleased: {
+                        Plasmoid.configuration.xPosition = root.x
+                        Plasmoid.configuration.yPosition = root.y
                     }
                 }
 
@@ -391,23 +405,23 @@ PlasmoidItem {
                 active = true
                 initMouseX = mouse.x
                 initMouseY = mouse.y
-                startW = root.Layout.preferredWidth
-                startH = root.Layout.preferredHeight
+                startW = root.width
+                startH = root.height
             }
 
             onPositionChanged: (mouse) => {
                 if (active) {
                     var dx = mouse.x - initMouseX
                     var dy = mouse.y - initMouseY
-                    root.Layout.preferredWidth = Math.max(root.minimumWidth, startW + dx)
-                    root.Layout.preferredHeight = Math.max(root.minimumHeight, startH + dy)
+                    root.width = Math.max(root.minimumWidth, startW + dx)
+                    root.height = Math.max(root.minimumHeight, startH + dy)
                 }
             }
 
             onReleased: {
                 active = false
-                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
-                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
+                Plasmoid.configuration.widgetWidth = root.width
+                Plasmoid.configuration.widgetHeight = root.height
             }
 
             Canvas {
@@ -446,19 +460,19 @@ PlasmoidItem {
             onPressed: (mouse) => {
                 active = true
                 initMouseY = mouse.y
-                startH = root.Layout.preferredHeight
+                startH = root.height
             }
 
             onPositionChanged: (mouse) => {
                 if (active) {
                     var dy = mouse.y - initMouseY
-                    root.Layout.preferredHeight = Math.max(root.minimumHeight, startH + dy)
+                    root.height = Math.max(root.minimumHeight, startH + dy)
                 }
             }
 
             onReleased: {
                 active = false
-                Plasmoid.configuration.widgetHeight = root.Layout.preferredHeight
+                Plasmoid.configuration.widgetHeight = root.height
             }
         }
 
@@ -480,19 +494,19 @@ PlasmoidItem {
             onPressed: (mouse) => {
                 active = true
                 initMouseX = mouse.x
-                startW = root.Layout.preferredWidth
+                startW = root.width
             }
 
             onPositionChanged: (mouse) => {
                 if (active) {
                     var dx = mouse.x - initMouseX
-                    root.Layout.preferredWidth = Math.max(root.minimumWidth, startW + dx)
+                    root.width = Math.max(root.minimumWidth, startW + dx)
                 }
             }
 
             onReleased: {
                 active = false
-                Plasmoid.configuration.widgetWidth = root.Layout.preferredWidth
+                Plasmoid.configuration.widgetWidth = root.width
             }
         }
     }

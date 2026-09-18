@@ -7,36 +7,43 @@ import org.kde.kcmutils as KCM
 KCM.SimpleKCM {
     id: root
 
-    property alias cfg_noteTransparency: transparencySlider.value
     property alias cfg_noteFontSize: fontSizeSpinBox.value
     property alias cfg_enableMarkdown: markdownCheck.checked
-
+    property alias cfg_noteTransparency: transparencySlider.value
     property string cfg_noteColor: "#fff176"
     property string cfg_noteFontFamily: "Sans Serif"
 
     Kirigami.FormLayout {
         RowLayout {
-            Kirigami.FormData.label: i18nc("@label", "Color de fondo:")
+            Kirigami.FormData.label: i18nc("@label", "Color:")
 
             Repeater {
                 model: [
-                    { name: "Amarillo", hex: "#fff176" },
-                    { name: "Rosa", hex: "#f48fb1" },
-                    { name: "Verde", hex: "#a5d6a7" },
-                    { name: "Azul", hex: "#90caf9" },
-                    { name: "Naranja", hex: "#ffcc80" },
-                    { name: "Morado", hex: "#ce93d8" },
-                    { name: "Cyan", hex: "#80deea" },
-                    { name: "Gris", hex: "#bdbdbd" },
-                    { name: "Blanco", hex: "#ffffff" }
+                    { n: "A", hex: "#fff176" },
+                    { n: "R", hex: "#f48fb1" },
+                    { n: "V", hex: "#a5d6a7" },
+                    { n: "Az", hex: "#90caf9" },
+                    { n: "N", hex: "#ffcc80" },
+                    { n: "M", hex: "#ce93d8" },
+                    { n: "C", hex: "#80deea" },
+                    { n: "G", hex: "#bdbdbd" },
+                    { n: "B", hex: "#ffffff" }
                 ]
                 Rectangle {
-                    width: 32
-                    height: 32
+                    width: 28
+                    height: 28
                     radius: 4
                     color: modelData.hex
                     border.color: root.cfg_noteColor === modelData.hex ? "#333" : "#ccc"
                     border.width: root.cfg_noteColor === modelData.hex ? 3 : 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: modelData.n
+                        font.pixelSize: 10
+                        font.bold: true
+                        color: "#333"
+                    }
 
                     MouseArea {
                         anchors.fill: parent
@@ -60,7 +67,7 @@ KCM.SimpleKCM {
 
             QQC2.Label {
                 text: Math.round(transparencySlider.value * 100) + "%"
-                implicitWidth: 40
+                textFormat: Text.PlainText
             }
         }
 
@@ -78,25 +85,17 @@ KCM.SimpleKCM {
             onActivated: (index) => root.cfg_noteFontFamily = fontCombo.model[index]
         }
 
-        RowLayout {
-            Kirigami.FormData.label: i18nc("@label", "Tamano de fuente:")
-
-            QQC2.SpinBox {
-                id: fontSizeSpinBox
-                from: 8
-                to: 72
-            }
-
-            QQC2.Label {
-                text: "px"
-                textFormat: Text.PlainText
-            }
+        QQC2.SpinBox {
+            id: fontSizeSpinBox
+            Kirigami.FormData.label: i18nc("@label", "Tamano:")
+            from: 8
+            to: 72
         }
 
         QQC2.CheckBox {
             id: markdownCheck
             Kirigami.FormData.label: i18nc("@label", "Markdown:")
-            text: i18nc("@option", "Habilitar soporte Markdown")
+            text: i18nc("@option", "Habilitar")
         }
     }
 }

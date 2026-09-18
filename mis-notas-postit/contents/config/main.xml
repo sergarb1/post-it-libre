@@ -32,5 +32,11 @@
         <entry name="widgetHeight" type="Int">
             <default>220</default>
         </entry>
+        <entry name="xPosition" type="Int">
+            <default>-1</default>
+        </entry>
+        <entry name="yPosition" type="Int">
+            <default>-1</default>
+        </entry>
     </group>
 </kcfg>
