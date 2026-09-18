@@ -14,23 +14,33 @@ PlasmoidItem {
     property int minimumWidth: 180
     property int minimumHeight: 60
 
-    property color noteColor: Plasmoid.configuration.noteColor
-    property real noteTransparency: Plasmoid.configuration.noteTransparency
-    property string noteFontFamily: Plasmoid.configuration.noteFontFamily
-    property int noteFontSize: Plasmoid.configuration.noteFontSize
-    property bool enableMarkdown: Plasmoid.configuration.enableMarkdown
+    property color noteColor: Plasmoid.configuration.noteColor || "#fff176"
+    property real noteTransparency: Plasmoid.configuration.noteTransparency || 1.0
+    property string noteFontFamily: Plasmoid.configuration.noteFontFamily || "Sans Serif"
+    property int noteFontSize: Plasmoid.configuration.noteFontSize || 14
+    property bool enableMarkdown: Plasmoid.configuration.enableMarkdown || false
 
     property bool initialized: false
+    opacity: initialized ? 1 : 0
+
+    Connections {
+        target: Plasmoid.configuration
+        function onChanged() {
+            root.noteColor = Plasmoid.configuration.noteColor || "#fff176"
+            root.noteTransparency = Plasmoid.configuration.noteTransparency || 1.0
+            root.noteFontFamily = Plasmoid.configuration.noteFontFamily || "Sans Serif"
+            root.noteFontSize = Plasmoid.configuration.noteFontSize || 14
+            root.enableMarkdown = Plasmoid.configuration.enableMarkdown || false
+        }
+    }
 
     Layout.minimumWidth: minimumWidth
     Layout.minimumHeight: isCollapsed ? 40 : minimumHeight
 
-    Component.onCompleted: {
-        var w = Plasmoid.configuration.widgetWidth
-        var h = Plasmoid.configuration.widgetHeight
-        if (w > 0) root.width = w
-        if (h > 0) root.height = h
+    width: Plasmoid.configuration.widgetWidth > 0 ? Plasmoid.configuration.widgetWidth : 280
+    height: isCollapsed ? 40 : (Plasmoid.configuration.widgetHeight > 0 ? Plasmoid.configuration.widgetHeight : 220)
 
+    Component.onCompleted: {
         var px = Plasmoid.configuration.xPosition
         var py = Plasmoid.configuration.yPosition
         if (px >= 0 && py >= 0) {
@@ -38,7 +48,20 @@ PlasmoidItem {
             root.y = py
         }
 
-        initialized = true
+        sizeTimer.restart()
+    }
+
+    Timer {
+        id: sizeTimer
+        interval: 100
+        repeat: false
+        onTriggered: {
+            var w = Plasmoid.configuration.widgetWidth
+            var h = Plasmoid.configuration.widgetHeight
+            if (w > 0) root.width = w
+            if (h > 0 && !root.isCollapsed) root.height = h
+            initialized = true
+        }
     }
 
     property var colorPalette: [
@@ -219,9 +242,7 @@ PlasmoidItem {
                         font.pixelSize: 11
                         onActivated: (index) => {
                             if (root.initialized) {
-                                var selectedFont = root.systemFonts[index]
-                                root.noteFontFamily = selectedFont
-                                Plasmoid.configuration.noteFontFamily = selectedFont
+                                Plasmoid.configuration.noteFontFamily = root.systemFonts[index]
                             }
                         }
                     }
@@ -236,7 +257,6 @@ PlasmoidItem {
                         font.pixelSize: 11
                         onValueModified: {
                             if (root.initialized) {
-                                root.noteFontSize = value
                                 Plasmoid.configuration.noteFontSize = value
                             }
                         }
@@ -263,7 +283,6 @@ PlasmoidItem {
                         implicitWidth: 70
                         implicitHeight: 26
                         onMoved: {
-                            root.noteTransparency = value
                             Plasmoid.configuration.noteTransparency = value
                         }
                         ToolTip.text: "Transparencia: " + Math.round(value * 100) + "%"
@@ -282,8 +301,7 @@ PlasmoidItem {
                         checkable: true
                         checked: root.enableMarkdown
                         onClicked: {
-                            root.enableMarkdown = !root.enableMarkdown
-                            Plasmoid.configuration.enableMarkdown = root.enableMarkdown
+                            Plasmoid.configuration.enableMarkdown = !Plasmoid.configuration.enableMarkdown
                         }
                         ToolTip.text: root.enableMarkdown ? "Markdown ON" : "Markdown OFF"
                         ToolTip.visible: hovered
@@ -325,7 +343,6 @@ PlasmoidItem {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        root.noteColor = modelData.hex
                                         Plasmoid.configuration.noteColor = modelData.hex
                                         colorPopup.visible = false
                                     }
